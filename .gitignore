@@ -1,0 +1,35 @@
+# Node
+node_modules/
+
+# Jekyll build
+_site/
+.sass-cache/
+.jekyll-cache/
+.jekyll-metadata
+
+# Bundler
+.bundle/
+vendor/
+
+# Logs
+*.log
+
+# OS junk
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# Ruby / Bundler stuff
+*.gem
+*.rbc
+
+# Temp files
+tmp/
+*.swp
+*.swo
+*~

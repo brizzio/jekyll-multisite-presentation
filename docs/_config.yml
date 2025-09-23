@@ -1,0 +1,5 @@
+title: Docs Site
+baseurl: "/repo/docs"
+url: "http://localhost:4001"
+theme: minima
+

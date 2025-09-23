@@ -1,0 +1,16 @@
+{
+  "name": "jekyll-multisite-example",
+  "private": true,
+  "scripts": {
+    "serve:demo": "cd demo && bundle exec jekyll serve --baseurl /demo --port 4000",
+    "serve:docs": "cd docs && bundle exec jekyll serve --baseurl /docs --port 4001",
+    "serve:all": "concurrently \"npm run serve:demo\" \"npm run serve:docs\"",
+    "serve:gh-pages": "node scripts/serve-gh-pages.js"
+  },
+  "devDependencies": {
+    "concurrently": "^9.0.0",
+    "shelljs": "^0.8.5",
+    "serve": "^14.2.1",
+    "open": "^9.1.0"
+  }
+}
