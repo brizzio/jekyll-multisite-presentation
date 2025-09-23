@@ -1,8 +1,9 @@
-name: Build and Deploy Jekyll Multisite
+name: Build and Deploy Jekyll Multi-Site
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main  # or your default branch
 
 jobs:
   build-and-deploy:
@@ -15,17 +16,11 @@ jobs:
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.2' # adjust to your Ruby version
-          bundler-cache: true
+          ruby-version: '3.2' # match your local version
 
-      - name: Install dependencies
+      - name: Install Jekyll & Bundler
         run: |
-          for dir in $(find . -maxdepth 1 -type d ! -name '.' ! -name '_site' ! -name '.github'); do
-            if [ -f "$dir/Gemfile" ]; then
-              echo "Installing gems in $dir"
-              (cd "$dir" && bundle install)
-            fi
-          done
+          gem install jekyll bundler
 
       - name: Build all Jekyll sites
         run: |
@@ -34,8 +29,9 @@ jobs:
             if [ -f "$dir/_config.yml" ]; then
               baseurl="/${dir#./}"
               echo "Building Jekyll site in $dir with baseurl=$baseurl"
+
               if [ -f "$dir/Gemfile" ]; then
-                (cd "$dir" && bundle exec jekyll build -d "../_site/${dir#./}" --baseurl "$baseurl")
+                (cd "$dir" && bundle install && bundle exec jekyll build -d "../_site/${dir#./}" --baseurl "$baseurl")
               else
                 (cd "$dir" && jekyll build -d "../_site/${dir#./}" --baseurl "$baseurl")
               fi
@@ -43,7 +39,8 @@ jobs:
           done
 
       - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v4
+        uses: peaceiris/actions-gh-pages@v6
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./_site
+          keep_files: true
