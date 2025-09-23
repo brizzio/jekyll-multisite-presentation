@@ -3,7 +3,7 @@ name: Build and Deploy Jekyll Multi-Site
 on:
   push:
     branches:
-      - main  # or your default branch
+      - main
 
 jobs:
   build-and-deploy:
@@ -16,11 +16,15 @@ jobs:
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.2' # match your local version
+          ruby-version: '3.2'
 
-      - name: Install Jekyll & Bundler
-        run: |
-          gem install jekyll bundler
+      - name: Cache Ruby gems
+        uses: actions/cache@v3
+        with:
+          path: vendor/bundle
+          key: ${{ runner.os }}-gems-${{ hashFiles('**/Gemfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-gems-
 
       - name: Build all Jekyll sites
         run: |
@@ -31,9 +35,15 @@ jobs:
               echo "Building Jekyll site in $dir with baseurl=$baseurl"
 
               if [ -f "$dir/Gemfile" ]; then
-                (cd "$dir" && bundle install && bundle exec jekyll build -d "../_site/${dir#./}" --baseurl "$baseurl")
+                cd "$dir"
+                bundle install --path vendor/bundle
+                bundle exec jekyll build -d "../_site/${dir#./}" --baseurl "$baseurl"
+                cd ..
               else
-                (cd "$dir" && jekyll build -d "../_site/${dir#./}" --baseurl "$baseurl")
+                cd "$dir"
+                gem install jekyll webrick minima
+                jekyll build -d "../_site/${dir#./}" --baseurl "$baseurl"
+                cd ..
               fi
             fi
           done
