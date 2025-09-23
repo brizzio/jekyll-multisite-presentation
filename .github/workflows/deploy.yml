@@ -2,61 +2,48 @@ name: Build and Deploy Jekyll Multisite
 
 on:
   push:
-    branches:
-      - main  # Change if your default branch is different
+    branches: [ main ]
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    steps:
-      # 1. Checkout repo
-      - name: Checkout repository
-        uses: actions/checkout@v3
 
-      # 2. Set up Ruby
-      - name: Setup Ruby
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.2'  # Match your local Ruby version
+          ruby-version: '3.2' # adjust to your Ruby version
+          bundler-cache: true
 
-      # 3. Install Bundler
-      - name: Install Bundler
-        run: gem install bundler
-
-      # 4. Install dependencies for each site
       - name: Install dependencies
         run: |
           for dir in $(find . -maxdepth 1 -type d ! -name '.' ! -name '_site' ! -name '.github'); do
             if [ -f "$dir/Gemfile" ]; then
-              echo "Installing bundle for $dir"
-              cd "$dir"
-              bundle install
-              cd ..
+              echo "Installing gems in $dir"
+              (cd "$dir" && bundle install)
             fi
           done
 
-      # 5. Build each Jekyll site into _site
-      - name: Build sites
+      - name: Build all Jekyll sites
         run: |
           mkdir -p _site
           for dir in $(find . -maxdepth 1 -type d ! -name '.' ! -name '_site' ! -name '.github'); do
             if [ -f "$dir/_config.yml" ]; then
-              echo "Building Jekyll site in $dir"
-              BASEURL="/${dir#./}"
-              cd "$dir"
-              if [ -f Gemfile ]; then
-                bundle exec jekyll build -d ../_site/${dir#./} --baseurl $BASEURL
+              baseurl="/${dir#./}"
+              echo "Building Jekyll site in $dir with baseurl=$baseurl"
+              if [ -f "$dir/Gemfile" ]; then
+                (cd "$dir" && bundle exec jekyll build -d "../_site/${dir#./}" --baseurl "$baseurl")
               else
-                jekyll build -d ../_site/${dir#./} --baseurl $BASEURL
+                (cd "$dir" && jekyll build -d "../_site/${dir#./}" --baseurl "$baseurl")
               fi
-              cd ..
             fi
           done
 
-      # 6. Deploy to gh-pages branch
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./_site
-          publish_branch: gh-pages
