@@ -5,6 +5,8 @@ source "https://rubygems.org"
 # Jekyll itself
 gem "jekyll", "~> 4.4"
 
+gem "github-pages", group: :jekyll_plugins
+
 # Theme
 gem "minima", "~> 2.5"
 
