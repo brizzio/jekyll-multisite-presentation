@@ -1,0 +1,4 @@
+title: My Multi-Site Presentation
+baseurl: ""  # root
+url: ""      # leave empty for GitHub Pages
+theme: minima

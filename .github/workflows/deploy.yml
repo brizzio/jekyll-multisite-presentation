@@ -28,24 +28,25 @@ jobs:
 
       - name: Build all Jekyll sites
         run: |
-          mkdir -p _site
-          for dir in $(find . -maxdepth 1 -type d ! -name '.' ! -name '_site' ! -name '.github'); do
+            mkdir -p _site
+
+            # Build sub-sites
+            for dir in $(find . -maxdepth 1 -type d ! -name '.' ! -name '_site' ! -name '.github' ! -name 'root-site'); do
             if [ -f "$dir/_config.yml" ]; then
-              baseurl="/${dir#./}"
-              echo "Building Jekyll site in $dir with baseurl=$baseurl"
-
-              cd "$dir"
-
-              # Install Bundler and gems
-              gem install bundler
-              bundle install --path vendor/bundle
-
-              # Build site with dynamic baseurl
-              bundle exec jekyll build -d "../_site/${dir#./}" --baseurl "$baseurl"
-
-              cd ..
+                baseurl="/${dir#./}"
+                echo "Building Jekyll site in $dir with baseurl=$baseurl"
+                cd "$dir"
+                bundle install --path vendor/bundle || true
+                bundle exec jekyll build -d "../_site/${dir#./}" --baseurl "$baseurl"
+                cd ..
             fi
-          done
+            done
+
+            # Build root landing site
+            cd root-site
+            bundle install --path vendor/bundle || true
+            bundle exec jekyll build -d "../_site"
+            cd ..
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
