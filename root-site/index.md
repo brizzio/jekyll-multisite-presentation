@@ -8,6 +8,6 @@ title: Welcome
 Below are the available sites:
 
 <ul>
-  <li><a href="/docs/">Docs Site</a></li>
-  <li><a href="/demo/">Demo Site</a></li>
+  <a href="{{ site.baseurl }}/docs/">Docs Site</a>
+  <li><a href="{{ site.baseurl }}/demo/">Demo Site</a></li>
 </ul>
