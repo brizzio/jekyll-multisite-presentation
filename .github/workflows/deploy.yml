@@ -34,17 +34,16 @@ jobs:
               baseurl="/${dir#./}"
               echo "Building Jekyll site in $dir with baseurl=$baseurl"
 
-              if [ -f "$dir/Gemfile" ]; then
-                cd "$dir"
-                bundle install --path vendor/bundle
-                bundle exec jekyll build -d "../_site/${dir#./}" --baseurl "$baseurl"
-                cd ..
-              else
-                cd "$dir"
-                gem install jekyll webrick minima
-                jekyll build -d "../_site/${dir#./}" --baseurl "$baseurl"
-                cd ..
-              fi
+              cd "$dir"
+
+              # Install Bundler and gems
+              gem install bundler
+              bundle install --path vendor/bundle
+
+              # Build site with dynamic baseurl
+              bundle exec jekyll build -d "../_site/${dir#./}" --baseurl "$baseurl"
+
+              cd ..
             fi
           done
 
