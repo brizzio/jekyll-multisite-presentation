@@ -2,3 +2,6 @@ title: My Multi-Site Presentation
 baseurl: ""  # root
 url: ""      # leave empty for GitHub Pages
 remote_theme: jekyll/minima
+# Needed for relative assets
+markdown: kramdown
+permalink: pretty

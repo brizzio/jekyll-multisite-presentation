@@ -4,3 +4,6 @@ theme: minima
 baseurl: ""             # Leave empty; overridden by CLI --baseurl
 url: ""                 # Leave empty for GitHub Pages
 
+# Needed for relative assets
+markdown: kramdown
+permalink: pretty
