@@ -3,29 +3,29 @@ name: Build and Deploy Jekyll Multi-Site
 on:
   push:
     branches:
-      - main  # your default branch
+      - main
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout repo
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2. Set up Ruby
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.2'  # match your local version
+          ruby-version: '3.2'
 
-      # 3. Install Bundler & global gems
-      - name: Install Jekyll & Bundler
-        run: |
-          gem install bundler jekyll webrick
+      - name: Cache Ruby gems
+        uses: actions/cache@v3
+        with:
+          path: vendor/bundle
+          key: ${{ runner.os }}-gems-${{ hashFiles('**/Gemfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-gems-
 
-      # 4. Build all Jekyll sites dynamically
       - name: Build all Jekyll sites
         run: |
           mkdir -p _site
@@ -35,19 +35,22 @@ jobs:
               echo "Building Jekyll site in $dir with baseurl=$baseurl"
 
               if [ -f "$dir/Gemfile" ]; then
-                (cd "$dir" && bundle install --path vendor/bundle && bundle exec jekyll build -d "../_site/${dir#./}" --baseurl "$baseurl")
+                cd "$dir"
+                bundle install --path vendor/bundle
+                bundle exec jekyll build -d "../_site/${dir#./}" --baseurl "$baseurl"
+                cd ..
               else
-                (cd "$dir" && jekyll build -d "../_site/${dir#./}" --baseurl "$baseurl")
+                cd "$dir"
+                gem install jekyll webrick minima
+                jekyll build -d "../_site/${dir#./}" --baseurl "$baseurl"
+                cd ..
               fi
             fi
           done
 
-      # 5. Deploy to GitHub Pages
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./_site
           keep_files: true
-          # force orphan branch for first deployment
-          force_orphan: true
